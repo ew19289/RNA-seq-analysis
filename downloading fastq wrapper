@@ -1,1 +1,54 @@
+#!/bin/bash
+#$ -cwd
+#$ -j y
+#$ -S /bin/bash
+#$ -q all.q
+#$ -M ew19289@essex.ac.uk
+#$ -m e
+#$ -l mem_free=10G
+#$ -pe smp 4
+
+source ./src/functions.sh
+
+
+SRR_CODE=$1
+FQ_DIR=$2
+
+#check inputs exist
+
+if [ $! -ne 2 ]; then
+        log "Exactly 2 inputs are needed"
+        exit 1
+fi
+
+#check inputs aren't empty
+
+if [ -z $1 ] ; then
+        log "SRR_CODE does not exist"
+        exit 1
+fi
+
+if [ -z $2 ] ; then
+        log "FQ_DIR does not exist"
+        exit 1
+fi
+
+
+log "$1: downloading from SRA"
+
+
+fastq-dump --outdir ${FQ_DIR} --split-files $SRR_CODE
+
+
+if [ $?=0 ] ; then
+        log "download complete"
+        exit
+        else
+                log "download incomplete"
+                exit 1
+fi
+
+
+#check it worked and log exit code
+
 

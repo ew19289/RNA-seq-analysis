@@ -1,1 +1,30 @@
 
+####STAR indexing script
+##run before the mapping wrapper
+
+
+#!/bin/bash
+#$ -cwd
+#$ -j y
+#$ -S /bin/bash
+#$ -q all.q
+#$ -M ew19289@essex.ac.uk
+#$ -m e
+#$ -l mem_free=50G
+#$ -pe smp 8
+
+source ./src/functions.sh
+
+
+STAR --runThreadN 8 --runMode genomeGenerate --genomeDir ./Mouse_ref_genome/ --genomeFastaFiles ./Mouse_ref_genome/Mus_musculus$
+
+
+if [ $? = 0 ] ; then
+        log "genome successfully indexed"
+        else
+                log "error in indexing reference genome"
+                exit 1
+fi
+
+
+

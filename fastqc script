@@ -1,1 +1,36 @@
+#!/bin/bash
+
+echo "Running fastQC"
+
+source ./src/functions.sh
+
+f="$1"
+FASTQC_PRE_TRIM_REPORT_DIR="./preTrimReport/"
+
+
+#where to put outputs
+create_folder ${FASTQC_PRE_TRIM_REPORT_DIR}
+
+
+#clear old report files
+reportFile=./preTrimReport/fastqc.out
+if [ -e ${reportFile} ]; then
+        rm $reportFile
+fi
+
+
+#run across all files, whether there is an output or not
+for f in ./fastq/*.fastq
+do
+        base=`echo $f | sed -e 's/.\/fastq\///' -e 's/.fastq//'`
+        outfile="${FASTQC_PRE_TRIM_REPORT_DIR}${base}_fastqc.zip"
+        log "looking for fastqc report files: ${outfile}"
+        if [ -e $outfile ]; then
+                log "${base}: FastQC output exists: skipping"
+                continue
+	fi
+
+        log "${base}: Running FastQC"
+        qsub -o ${reportFile} -N "fqc_${base}" ./src/fastqc_wrapper.sh ${f} ${FASTQC_PRE_TRIM_REPORT_DIR} $base
+done
 

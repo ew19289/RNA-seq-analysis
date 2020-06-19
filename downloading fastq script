@@ -1,1 +1,30 @@
 
+###give SRRlist as input to this when running it
+
+#!/bin/bash
+
+source ./src/functions.sh
+
+SRR_LIST="$1"
+FQ_DIR="./fastq/"
+
+if [ -z $1 ] ; then
+        log "SRR list not provided"
+        exit 1
+fi
+
+####################this if statment says if argument one is empty, log that list isn't provided
+#####################and exit with exit code 1
+
+create_folder ${FQ_DIR}
+
+#####################create a folder with the name of the FQ_DIR
+
+
+
+log "Reading file ${SRR_LIST}"
+
+#################log that the file of SRR lists is being read
+
+
+

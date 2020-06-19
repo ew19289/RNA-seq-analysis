@@ -1,1 +1,41 @@
+#!/bin/bash
+
+#$ -cwd
+#$ -j y
+#$ -S /bin/bash
+#$ -q all.q
+#$ -M ew19289@essex.ac.uk
+#$ -m e
+#$ -pe smp 4
+
+#expected arguments
+# 1 - fastq file for R1
+# 2 - trimming directory for output
+# 3 - report directory for fastqc
+# 4 - fastq file for R2 (optional, paired end only)
+
+source ./src/functions.sh
+
+log "processing $1"
+
+fastqcArgs="-t 4 --outdir $3 --nogroup --extract"
+
+#decide if single or paired end using test for the empty string
+if [ ! -z "$4" ]; then
+        log "Paired end reads supplied"
+        log "running trim galore -o $2 --paired --fastqc --fastqc_args ${fastqcArgs} ${1} ${4}"
+        trim_galore -o $2 --paired --fastqc --fastqc_args "${fastqcArgs}" ${1} ${4}
+else
+        log "Single end reads supplied"
+        log " Running trim_galore -o $2 --fastqc --fastqc_args ${fastqcArgs} ${1}"
+        trim_galore -o $2 --fastqc --fastqc_args "${fastqcArgs}" ${1}
+fi
+
+#check it worked
+if [ $? -ne "0" ] ; then
+        log "Error trimming reads from $1"
+else
+        log "trimming complete"
+fi
+
 

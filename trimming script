@@ -1,1 +1,69 @@
 
+#!/bin/bash
+
+#this script runs Trim Galore on all fastq files in fastq directory
+#invoke from the project directory
+#results are output to a report folder 'trimming'
+
+#no arguments need to be supplied when running this script
+
+source ./src/functions.sh
+
+
+log "Running fastQC trimmer"
+
+
+#where to put trimmed read outputs
+create_folder $TRIM_DIR
+
+#where to put reports
+outdir="./postTrimReport/"
+create_folder $outdir
+
+
+
+#clear old report files
+reportFile="./postTrimReport/trimming.out"
+if [ -e ${reportFile} ]; then
+        rm $reportFile
+fi
+
+
+#submit each file using wrapper script
+for f in ./fastq/*.fastq
+do
+        #pare back the _1.fastq to get the base SRR name and read
+        file=`echo $f | sed -e 's/\.\/fastq\///' -e 's/\.fastq$//'`
+        base=`echo $file | sed -e 's/_[1-2]//'`
+        read=`echo $file | sed -e 's/^.*_//'`
+
+        #skip if read 2
+        if [ ${read} -eq "2" ]; then
+                log "${base}: Skipping a read 2 file: $f"
+                continue;
+        fi
+
+	log "${base}: Trimming ${f}"
+        #Build expected read 2 file name
+        read2File="./fastq/${base}_2.fastq"
+
+        # Check if read 2 file exists
+        read2Cmd=""
+        if [ -e ${read2File} ]; then
+                read2Cmd=${read2File}
+                log "${base}: Paired end sample detected"
+        fi
+
+        #check if the output file already exists - don't overwrite
+        outfile="${TRIM_DIR}${base}_${read}_trimmed.fq"
+        if [ -e ${outfile} ]; then
+                log "${base}: output exists: skipping"
+                        continue;
+
+
+        qsub -o ${reportFile} -N trim_${base} ./src/trimming_wrapper.sh ${f} ${TRIM_DIR} ${outdir} ${read2Cmd}
+
+done
+
+
+

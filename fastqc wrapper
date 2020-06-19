@@ -1,1 +1,54 @@
 
+#!/bin/bash
+#$ -cwd
+#$ -j y
+#$ -S /bin/bash
+#$ -q all.q
+#$ -M ew19289@essex.ac.uk
+#$ -m e
+#$ -l mem_free=10G
+#$ -pe smp 4
+
+source ./src/functions.sh
+
+
+FQ_CODE=$1
+FASTQC_PRE_TRIM_REPORT_DIR=$2
+
+#check inputs exist
+
+if [ $! -ne 2 ]; then
+        log "Exactly 2 inputs are needed"
+        exit 1
+fi
+
+
+#check inputs aren't empty
+
+if [ -z $1 ] ; then
+        log "FASTQ_CODE does not exist"
+        exit 1
+fi
+
+if [ -z $2 ] ; then
+        log "FQC__PRE_TRIM_REPORT_DIR does not exist"
+        exit 1
+fi
+
+
+log "$1: getting fastqc scores"
+
+
+fastqc -t 4 --outdir=${FASTQC_PRE_TRIM_REPORT_DIR} --nogroup --extract ${FQ_CODE}
+
+
+#check it worked and log exit code
+
+
+if [ $? = 0 ] ; then
+        log "FASTQC score obtained"
+        else
+                log "error obtaining FASTQ"
+                exit 1
+fi
+
